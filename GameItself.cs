@@ -7,67 +7,80 @@ using static System.Console;
 
 Menu();
 
-
 static void Menu()
 {
-
-    DrawWindow(8, 2, 40, 13, "Menu", true);
-    SetCursorPosition(12, 5);
-    WriteLine("1. New game");
-    SetCursorPosition(12, 6);
-    WriteLine("2. Rules");
-    SetCursorPosition(12, 7);
-    WriteLine("3. Last results");
-    SetCursorPosition(12, 8);
-    WriteLine("4. Exit");
-
-    // Обработка выбора
-    SetCursorPosition(12, 11);
-    Write("Write down your choice: ");
-    int choice = Convert.ToInt32(ReadLine());
-
-    switch(choice)
+    bool showmenu = true;
+    while (showmenu)
     {
-        case 1:
-            {
-                string dealer, debtor;
+        DrawWindow(8, 2, 40, 13, "Меню", true);
+        SetCursorPosition(12, 5);
+        WriteLine("1. Новая игра.");
+        SetCursorPosition(12, 6);
+        WriteLine("2. Правила.");
+        SetCursorPosition(12, 7);
+        WriteLine("3. Результаты.");
+        SetCursorPosition(12, 8);
+        WriteLine("4. Выход");
 
-                DrawWindow(8, 2, 40, 13, "Dealer's turn.", true);
-                SetCursorPosition(15, 7);
-                WriteLine("Enter dealer's nickname.");
-                SetCursorPosition(25, 10);
-                dealer = ReadLine();
+        // Обработка выбора
+        SetCursorPosition(12, 11);
+        Write("Введите свой выбор: ");
+        SetCursorPosition(31, 12);
+        WriteLine("════════");
+        SetCursorPosition(32, 11);
+        int choice = Convert.ToInt32(ReadLine());
 
-                Clear();
+        switch (choice)
+        {
+            case 1:
+                {
+                    string dealer, debtor;
 
-                DrawWindow(8, 2, 40, 13, "Debtor's turn.", true);
-                SetCursorPosition(15, 7);
-                WriteLine("Enter debtor's nickname.");
-                SetCursorPosition(25, 10);
-                debtor = ReadLine();
+                    DrawWindow(8, 2, 40, 13, "Дилер", true);
+                    SetCursorPosition(12, 7);
+                    WriteLine("Введите имя сегодняшнего Дилера.");
+                    SetCursorPosition(14, 11);
+                    WriteLine("══════════════════════════");
+                    SetCursorPosition(22, 10);
+                    dealer = ReadLine();
+
+                    Clear();
+
+                    DrawWindow(8, 2, 40, 13, "Должник", true);
+                    SetCursorPosition(12, 7);
+                    WriteLine("Введите имя сегодняшнего Должника.");
+                    SetCursorPosition(14, 11);
+                    WriteLine("══════════════════════════");
+                    SetCursorPosition(22, 10);
+                    debtor = ReadLine();
 
 
-                Clear();
-                Game(dealer, debtor);
+                    Clear();
+                    Game(dealer, debtor);
 
-                break;
-            }
-        case 2:
-            {
+                    showmenu = false;
+
+                    break;
+                }
+            case 2:
+                {
+                    ShowRules();
+
+                    break;
+                }
+            case 3:
+                {
 
 
-                break;
-            }
-        case 3:
-            {
+                    break;
+                }
+            case 4:
+                {
+                    showmenu = false;
 
-
-                break;
-            }
-        case 4:
-            {
-                break;
-            }
+                    break;
+                }
+        }
     }
 }
 
@@ -78,6 +91,7 @@ static void Game(string dealer_name, string debtor_name)
     table._whos_turn = true;
     int rounds = 1;
     Random rand = new Random();
+    string fin = "buff";
 
     int wx = 8, wy = 3;
     int x = wx+3, y = wy+3;
@@ -87,7 +101,7 @@ static void Game(string dealer_name, string debtor_name)
     table.ShuffleDeck();
     table.DealCards();
 
-    while (table.MrSaw._dealer != 0 || table.MrSaw._debtor != 0)
+    while (table.MrSaw._dealer > 0 && table.MrSaw._debtor > 0)
     {
         x = wx + 3;
         y = wy + 3;
@@ -98,7 +112,7 @@ static void Game(string dealer_name, string debtor_name)
             y = wy + 3;
             if (table._whos_turn == false)
             {
-                DrawWindow(wx, wy, wid, len, $"{table._dealer._nick}'s turn", true);
+                DrawWindow(wx, wy, wid, len, $"{table._dealer._nick} делает свой ход", true);
 
                 PrintPlayersPov(table, wid, y, x);
 
@@ -131,13 +145,13 @@ static void Game(string dealer_name, string debtor_name)
                             }
                         case DrawOrStay.PrintTrumps:
                             {
-                                DrawWindow(wx, wy, wid, len, $"{table._dealer._nick}'s turn", true);
+                                DrawWindow(wx, wy, wid, len, $"{table._dealer._nick} делает свой ход", true);
 
                                 PrintPlayersPov(table, wid, y, x);
 
                                 PrintTrumpsWindow(x-3, y + len, len, wid, table._debtor);
 
-                                buff_table = new Table(table._dealer.UseTrump(table));
+                                buff_table = new Table(table._dealer.UseTrump(table, x, y+len+2));
 
                                 if (table == buff_table)
                                 {
@@ -160,14 +174,14 @@ static void Game(string dealer_name, string debtor_name)
                     x = wx + 3;
                     y = wy + 3;
 
-                    DrawWindow(wx, wy, wid, len, $"{table._dealer._nick}'s turn", true);
+                    DrawWindow(wx, wy, wid, len, $"{table._dealer._nick} делает свой ход", true);
 
                     PrintPlayersPov(table, wid, y, x);
                 }
             }
             else
             {
-                DrawWindow(wx, wy, wid, len, $"{table._debtor._nick}'s turn", true);
+                DrawWindow(wx, wy, wid, len, $"{table._debtor._nick} делает свой ход", true);
 
                 PrintPlayersPov(table, wid, y, x);
 
@@ -200,13 +214,13 @@ static void Game(string dealer_name, string debtor_name)
                             }
                         case DrawOrStay.PrintTrumps:
                             {
-                                DrawWindow(wx, wy, wid, len, $"{table._debtor._nick}'s turn", true);
+                                DrawWindow(wx, wy, wid, len, $"{table._debtor._nick} делает свой ход", true);
 
                                 PrintPlayersPov(table, wid, y, x);
 
                                 PrintTrumpsWindow(x-3, y + len, len, wid, table._debtor);
 
-                                buff_table = new Table(table._dealer.UseTrump(table));
+                                buff_table = new Table(table._dealer.UseTrump(table, x, y + len + 2));
 
                                 if (table == buff_table)
                                 {
@@ -229,7 +243,7 @@ static void Game(string dealer_name, string debtor_name)
                     x = wx + 3;
                     y = wy + 3;
 
-                    DrawWindow(wx, wy, wid, len, $"{table._debtor._nick}'s turn", true);
+                    DrawWindow(wx, wy, wid, len, $"{table._debtor._nick} делает свой ход", true);
 
                     PrintPlayersPov(table, wid, y, x);
                 }
@@ -244,9 +258,7 @@ static void Game(string dealer_name, string debtor_name)
             table.MrSaw._dealer += table.MrSaw._move;
             table.MrSaw._debtor -= table.MrSaw._move;
 
-            table.MrSaw._move++;
-
-            WriteLine($"\n{table._debtor._nick} is loser.");
+            fin = $"{table._debtor._nick} проиграл.";
         }
         else if (table._dealer.CurrSum(true) < table._debtor.CurrSum(true) && table._debtor.CurrSum(true) <= table._plank
             || table._dealer.CurrSum(true) > table._plank && table._debtor.CurrSum(true) > table._plank && table._dealer.CurrSum(true) > table._debtor.CurrSum(true))
@@ -254,39 +266,156 @@ static void Game(string dealer_name, string debtor_name)
             table.MrSaw._debtor += table.MrSaw._move;
             table.MrSaw._dealer -= table.MrSaw._move;
 
-            table.MrSaw._move++;
-
-            WriteLine($"\n{table._dealer._nick} is loser.");
+            fin = $"{table._dealer._nick} проиграл.";
         }
         else if (table._dealer.CurrSum(true) > table._plank && table._debtor.CurrSum(true) < table._plank)
         {
             table.MrSaw._debtor += table.MrSaw._move;
             table.MrSaw._dealer -= table.MrSaw._move;
 
-            table.MrSaw._move++;
-
-            WriteLine($"\n{table._dealer._nick} is loser.");
+            fin = $"{table._dealer._nick} проиграл.";
         }
         else if (table._dealer.CurrSum(true) < table._plank && table._debtor.CurrSum(true) > table._plank)
         {
             table.MrSaw._dealer += table.MrSaw._move;
             table.MrSaw._debtor -= table.MrSaw._move;
 
-            table.MrSaw._move++;
-
-            WriteLine($"\n{table._debtor._nick} is loser.");
+            fin = $"{table._debtor._nick} проиграл.";
         }
 
-        table.ReturnIntoDeck();
-        table.ShuffleDeck();
-        table.DealCards();
+        if (table.MrSaw._dealer > 0 && table.MrSaw._debtor > 0)
+        {
+            DrawWindow(wx, wy, 40, 8, fin, false);
+            SetCursorPosition(wx + 2, wy + 3);
+            Write("Нажмите Enter для следующего раунда.");
+            SetCursorPosition(wx + 19, wy + 5);
+            ReadLine();
 
-        table._dealer._readyToFinish = false;
-        table._debtor._readyToFinish = false;
+            table.ReturnIntoDeck();
+            table.ShuffleDeck();
+            table.DealCards();
 
-        table._plank = 21;
-        table._tabled_trumps._trumps.Clear();
+            table._dealer._readyToFinish = false;
+            table._debtor._readyToFinish = false;
+
+            table.MrSaw._move++;
+            table._plank = 21;
+            table._tabled_trumps._trumps.Clear();
+        }
     }
+
+    if(table.MrSaw._dealer <= 0)
+    {
+        DrawWindow(wx, wy, 40, 8, $"{table._dealer._nick} победил!", true);
+        SetCursorPosition(wx + 3, wy + 3);
+        Write("Нажмите Enter для завершения игры.");
+        SetCursorPosition(wx + 19, wy + 5);
+        ReadLine();
+    }
+    else if(table.MrSaw._debtor <= 0)
+    {
+        DrawWindow(wx, wy, 40, 8, $"{table._debtor._nick} победил!", true);
+        SetCursorPosition(wx + 3, wy + 3);
+        Write("Нажмите Enter для завершения игры.");
+        SetCursorPosition(wx + 19, wy + 5);
+        ReadLine();
+    }
+
+    SetCursorPosition(wx + 20, wy + 10);
+}
+
+static void ShowRules()
+{
+    int wx = 8, wy = 3;
+    int x = wx + 3, y = wy + 3;
+    int wid = 80, len = 18;
+    List<Trump> ruleTrumps = new List<Trump>()
+    {
+        new SvTPlank ( "17", "Планка очков понизится до 17."),
+        new TwFPlank ( "24", "Планка очков вырастет до 24."),
+        new TwSPlank ( "27", "Планка очков вырастет до 27."),
+        new TwCard ( "2<", "Вы вытянете карту '2' если таковой нет на столе."),
+        new ThCard ( "3<", "Вы вытянете карту '3' если таковой нет на столе."),
+        new FrCard ( "4<", "Вы вытянете карту '4' если таковой нет на столе."),
+        new FvCard ( "5<", "Вы вытянете карту '5' если таковой нет на столе."),
+        new SxCard ( "6<", "Вы вытянете карту '6' если таковой нет на столе."),
+        new SvCard ( "7<", "Вы вытянете карту '7' если таковой нет на столе."),
+        new PrfCard( "*<", "Вы вытянете наиболее удачную для Вас карту."),
+        new IncBet ( "˄", "Текущая ставка увеличится на 1."),
+        new DiscBet ( "˅", "Текущая ставка уменьшится на 1."),
+        new Destroy ( "X", "Обнуляет действие последнего козыря на столе."),
+        new Disservice ( ">?", "Оппонент вытянет одну случайную карту."),
+        new Switch ( "><", "Произойдёт обмен последними вытянутыми картами.")
+    };
+
+    DrawWindow(wx, wy, wid, len, $"Правила", true);
+
+    SetCursorPosition(x + 2, y);
+    Write("- Ваша цель: набрать сумму карт равную 21 или приближенное к нему.");
+    y += 2;
+    SetCursorPosition(x + 2, y);
+    Write("- Карты не могут повторяться.");
+    y += 2;
+    SetCursorPosition(x + 2, y);
+    Write("- Ставка увеличивается на 1 после каждого раунда.");
+    y += 2;
+    SetCursorPosition(x + 2, y);
+    Write("- Раунд продолжается до тех пор, пока оба игрока не выберут (S)tay.");
+    y += 2;
+    SetCursorPosition(x + 2, y);
+    Write("- Если игрок 1 выбрал (S)tay а игрок 1 использовал какую-либо");
+    y += 1;
+    SetCursorPosition(x + 3, y);
+    Write("козырную карту, то ход переходит к игроку 1 вместо подведения итогов.");
+    y += 2;
+    SetCursorPosition(x + 2, y);
+    Write("- Игра заканчивается, тогда когда очки одного из игроков равны 0.");
+
+    x += 6;
+    wx += 6;
+    foreach (var card in ruleTrumps)
+    {
+        DrawWindow(wx, wy + y + 2, wid - 12, 7, $"Козырь '{card._sign}'", false);
+
+        y+=6;
+        SetCursorPosition(x, y);
+        Write("╔═════╗");
+
+        SetCursorPosition(x, y + 1);
+        Write("║     ║");
+
+        SetCursorPosition(x, y + 2);
+
+        if ((int)(card._sign.Length) < 2)
+        {
+            Write($"║  {card._sign}  ║");
+        }
+        else
+        {
+            char f = card._sign[0], s = card._sign[1];
+
+            Write($"║ {f} {s} ║");
+        }
+
+        SetCursorPosition(x, y + 3);
+        Write("║     ║");
+
+        SetCursorPosition(x, y + 4);
+        Write("╚═════╝");
+
+        SetCursorPosition(x + 10, y + 2);
+        Write(card._desc);
+        y += 2;
+    }
+
+    x += 12;
+    wx += 12;
+
+    DrawWindow(wx, wy + y + 2, 44, 7, $"Конец", false);
+    SetCursorPosition(wx + 4, wy + y + 4);
+    Write("Нажмите Enter для возвращения в меню.");
+    SetCursorPosition(wx + wx / 2 +8, wy + y + 6);
+    ReadLine();
 }
 
 static void DrawWindow(int x, int y, int width, int height, string title, bool clearornot)
@@ -325,7 +454,7 @@ static void PrintPlayersPov(Table table, int wid, int y, int x)
         table._dealer._chandful.PrintCards(false, x, y);
         y += 6;
         SetCursorPosition(x, y);
-        WriteLine($"Summ: ??? + {table._dealer.CurrSum(false)}/{table._plank}");
+        WriteLine($"Счёт: ??? + {table._dealer.CurrSum(false)}/{table._plank}");
         y += 2;
         SetCursorPosition(x-2, y);
         WriteLine(new string('═', wid-2));
@@ -334,7 +463,7 @@ static void PrintPlayersPov(Table table, int wid, int y, int x)
         Write($"{table.MrSaw._dealer}");
         y += 2;
         SetCursorPosition(x + 2, y);
-        Write($"Bet: {table.MrSaw._move}");
+        Write($"Ставка: {table.MrSaw._move}");
         y+=2;
         SetCursorPosition(x + 2, y);
         Write($"{table.MrSaw._debtor}");
@@ -346,11 +475,11 @@ static void PrintPlayersPov(Table table, int wid, int y, int x)
         SetCursorPosition(x, y);
         if (table._debtor.CurrSum(true) <= table._plank)
         {
-            WriteLine($"Summ: {table._debtor.CurrSum(true)}/{table._plank}");
+            WriteLine($"Счёт: {table._debtor.CurrSum(true)}/{table._plank}");
         }
         else
         {
-            WriteLine($"Summ: {table._debtor.CurrSum(true)}/{table._plank} Someone's got overload! Who might it be..");
+            WriteLine($"Счёт: {table._debtor.CurrSum(true)}/{table._plank} Кажется, у кого-то проблемы..");
         }
         y += 3;
         table._debtor._chandful.PrintCards(true, x, y);
@@ -360,7 +489,7 @@ static void PrintPlayersPov(Table table, int wid, int y, int x)
         table._debtor._chandful.PrintCards(false, x, y);
         y += 6;
         SetCursorPosition(x, y);
-        WriteLine($"Summ: ??? + {table._debtor.CurrSum(false)}/{table._plank}");
+        WriteLine($"Счёт: ??? + {table._debtor.CurrSum(false)}/{table._plank}");
         y += 2;
         SetCursorPosition(x - 2, y);
         WriteLine(new string('═', wid - 2));
@@ -369,7 +498,7 @@ static void PrintPlayersPov(Table table, int wid, int y, int x)
         Write($"{table.MrSaw._debtor}");
         y+=2;
         SetCursorPosition(x + 2, y);
-        Write($"Bet: {table.MrSaw._move}");
+        Write($"Ставка: {table.MrSaw._move}");
         y+=2;
         SetCursorPosition(x + 2, y);
         Write($"{table.MrSaw._dealer}");
@@ -381,11 +510,11 @@ static void PrintPlayersPov(Table table, int wid, int y, int x)
         SetCursorPosition(x, y);
         if (table._dealer.CurrSum(true) <= table._plank)
         {
-            WriteLine($"Summ: {table._dealer.CurrSum(true)}/{table._plank}");
+            WriteLine($"Счёт: {table._dealer.CurrSum(true)}/{table._plank}");
         }
         else
         {
-            WriteLine($"Summ: {table._dealer.CurrSum(true)}/{table._plank} Someone's got overload! Who might it be..");
+            WriteLine($"Счёт: {table._dealer.CurrSum(true)}/{table._plank} Кажется, у кого-то проблемы..");
         }
         y += 3;
         table._dealer._chandful.PrintCards(true, x, y);
@@ -417,21 +546,21 @@ public class Table
 
     public List<Trump> _trumps = new List<Trump>()
     {
-        new SvTPlank ( "17", "Plank is gonna be scanged to the 17."),
-        new TwFPlank ( "24", "Plank is gonna be scanged to the 24."),
-        new TwSPlank ( "27", "Plank is gonna be scanged to the 27."),
-        new TwCard ( "2<", "Hits you the 2-card if there's no such on the table."),
-        new ThCard ( "3<", "Hits you the 3-card if there's no such on the table."),
-        new FrCard ( "4<", "Hits you the 4-card if there's no such on the table."),
-        new FvCard ( "5<", "Hits you the 5-card if there's no such on the table."),
-        new SxCard ( "6<", "Hits you the 6-card if there's no such on the table."),
-        new SvCard ( "7<", "Hits you the 7-card if there's no such on the table."),
-        new PrfCard( "*<", "Hits you perfect possible card from the deck"),
-        new IncBet ( "˄", "Increases bet (Mr. Saw's move) for one."),
-        new DiscBet ( "˅", "Discreases bet (Mr. Saw's move) for one."),
-        new Destroy ( "X", "Destroys the last trump card opponent placed on the table."),
-        new Disservice ( ">?", "Opponent draws one card."),
-        new Switch ( "><", "Switches the last drawn by you and your opponent cards.")
+        new SvTPlank ( "17", "Планка очков понизится до 17."),
+        new TwFPlank ( "24", "Планка очков вырастет до 24."),
+        new TwSPlank ( "27", "Планка очков вырастет до 27."),
+        new TwCard ( "2<", "Вы вытянете карту '2' если таковой нет на столе."),
+        new ThCard ( "3<", "Вы вытянете карту '3' если таковой нет на столе."),
+        new FrCard ( "4<", "Вы вытянете карту '4' если таковой нет на столе."),
+        new FvCard ( "5<", "Вы вытянете карту '5' если таковой нет на столе."),
+        new SxCard ( "6<", "Вы вытянете карту '6' если таковой нет на столе."),
+        new SvCard ( "7<", "Вы вытянете карту '7' если таковой нет на столе."),
+        new PrfCard( "*<", "Вы вытянете наиболее удачную для Вас карту."),
+        new IncBet ( "˄", "Текущая ставка увеличится на 1."),
+        new DiscBet ( "˅", "Текущая ставка уменьшится на 1."),
+        new Destroy ( "X", "Обнуляет действие последнего козыря на столе."),
+        new Disservice ( ">?", "Оппонент вытянет одну случайную карту."),
+        new Switch ( "><", "Произойдёт обмен последними вытянутыми картами.")
     };
 
     public TrumpHandful _tabled_trumps { get; set; }
@@ -485,18 +614,18 @@ public class Table
         {
             SetCursorPosition(x, y);
 
-            Write("Wanna (D)raw, (S)tay or (P)rint trumps?");
+            Write("(В)ытянуть карту, (О)статься или (П)осмотреть козыри?");
 
             SetCursorPosition(x, y + 1);
             string input = ReadLine().ToUpper();
 
             switch (input)
             {
-                case "D": return DrawOrStay.Draw;
+                case "В": return DrawOrStay.Draw;
 
-                case "S": return DrawOrStay.Stay;
+                case "О": return DrawOrStay.Stay;
 
-                case "P": return DrawOrStay.PrintTrumps;
+                case "П": return DrawOrStay.PrintTrumps;
             }
         }
     }
@@ -645,27 +774,23 @@ public class Player
         _chandful._cards.Add(drawncard);
 
         _readyToFinish = false;
-
-        WriteLine($"{_nick} drew card with value {drawncard._value}");
     }
 
     public void Stay()
     {
         _readyToFinish = true;
-
-        WriteLine($"{_nick} decided to stay.");
     }
 
     public void TakeTurn(int x, int y)
     {
         SetCursorPosition(x, y );
-        WriteLine($"- {_nick}'s choosing their next move. Better do it carefully...");
+        WriteLine($"- {_nick} делает свой выбор. Пожелаем ему удачи!");
     }
 
-    public Table UseTrump(Table buffT)
+    public Table UseTrump(Table buffT, int x, int y)
     {
-        WriteLine("Put the number of trump card that you want to use (0 - exit): ");
-
+        WriteLine("Введите номер козыря который желаете использовать (0 - выход): ");
+        SetCursorPosition(x + 42, y+7);
         int trump = Convert.ToInt32(ReadLine());
 
         if(trump == 0)
