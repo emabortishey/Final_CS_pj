@@ -1,17 +1,87 @@
 ﻿using System;
 using System.ComponentModel.Design;
+using System.Security.Cryptography;
 using static System.Console;
 
-Game();
+//Game();
 
-static void Game()
+Menu();
+
+
+static void Menu()
 {
-    Table table = new Table("Dealer", "Debtor");
+
+    DrawWindow(8, 2, 40, 13, "Menu", true);
+    SetCursorPosition(12, 5);
+    WriteLine("1. New game");
+    SetCursorPosition(12, 6);
+    WriteLine("2. Rules");
+    SetCursorPosition(12, 7);
+    WriteLine("3. Last results");
+    SetCursorPosition(12, 8);
+    WriteLine("4. Exit");
+
+    // Обработка выбора
+    SetCursorPosition(12, 11);
+    Write("Write down your choice: ");
+    int choice = Convert.ToInt32(ReadLine());
+
+    switch(choice)
+    {
+        case 1:
+            {
+                string dealer, debtor;
+
+                DrawWindow(8, 2, 40, 13, "Dealer's turn.", true);
+                SetCursorPosition(15, 7);
+                WriteLine("Enter dealer's nickname.");
+                SetCursorPosition(25, 10);
+                dealer = ReadLine();
+
+                Clear();
+
+                DrawWindow(8, 2, 40, 13, "Debtor's turn.", true);
+                SetCursorPosition(15, 7);
+                WriteLine("Enter debtor's nickname.");
+                SetCursorPosition(25, 10);
+                debtor = ReadLine();
+
+
+                Clear();
+                Game(dealer, debtor);
+
+                break;
+            }
+        case 2:
+            {
+
+
+                break;
+            }
+        case 3:
+            {
+
+
+                break;
+            }
+        case 4:
+            {
+                break;
+            }
+    }
+}
+
+static void Game(string dealer_name, string debtor_name)
+{
+    Table table = new Table(dealer_name, debtor_name);
     Table buff_table = new Table("buff", "buff");
     table._whos_turn = true;
     int rounds = 1;
     Random rand = new Random();
 
+    int wx = 8, wy = 3;
+    int x = wx+3, y = wy+3;
+    int wid = 80, len = 34;
     DrawOrStay choice;
 
     table.ShuffleDeck();
@@ -19,36 +89,27 @@ static void Game()
 
     while (table.MrSaw._dealer != 0 || table.MrSaw._debtor != 0)
     {
-        WriteLine($"Round №{rounds++}.");
+        x = wx + 3;
+        y = wy + 3;
 
         while (table._dealer._readyToFinish == false || table._debtor._readyToFinish == false)
         {
+            x = wx + 3;
+            y = wy + 3;
             if (table._whos_turn == false)
             {
-                table._debtor._chandful.PrintCards(false);
-                WriteLine($"\nSumm: ??? + {table._debtor.CurrSum(false)}/{table._plank}");
-                WriteLine("\n__________________________________________________________\n");
-                Write($"Plank: {table._plank}\n{table.MrSaw._debtor}\n\t{table.MrSaw._move}\n{table.MrSaw._debtor}");
-                table._tabled_trumps.PrintTrumps();
-                WriteLine("\n__________________________________________________________\n");
-                table._dealer._chandful.PrintCards(true);
-                if (table._dealer.CurrSum(true) <= table._plank)
-                {
-                    WriteLine($"\nSumm: {table._dealer.CurrSum(true)}/{table._plank}");
-                }
-                else
-                {
-                    WriteLine($"\nSumm: {table._dealer.CurrSum(true)}/{table._plank} Someone's got overload! Who might it be..");
-                }
+                DrawWindow(wx, wy, wid, len, $"{table._dealer._nick}'s turn", true);
+
+                PrintPlayersPov(table, wid, y, x);
 
                 table.Turn += table._dealer.TakeTurn;
-                table.TakingTurn();
+                table.TakingTurn(x, len - 2);
 
                 choice = DrawOrStay.Awaitness;
 
                 while (choice == DrawOrStay.Awaitness)
                 {
-                    choice = table.GetPlayerChoice();
+                    choice = table.GetPlayerChoice(x, len -1);
 
                     switch (choice)
                     {
@@ -70,7 +131,11 @@ static void Game()
                             }
                         case DrawOrStay.PrintTrumps:
                             {
-                                table._dealer._thandful.PrintTrumps();
+                                DrawWindow(wx, wy, wid, len, $"{table._dealer._nick}'s turn", true);
+
+                                PrintPlayersPov(table, wid, y, x);
+
+                                PrintTrumpsWindow(x-3, y + len, len, wid, table._debtor);
 
                                 buff_table = new Table(table._dealer.UseTrump(table));
 
@@ -90,34 +155,30 @@ static void Game()
 
                     table.Turn -= table._dealer.TakeTurn;
                     table._whos_turn = true;
+
+                    Clear();
+                    x = wx + 3;
+                    y = wy + 3;
+
+                    DrawWindow(wx, wy, wid, len, $"{table._dealer._nick}'s turn", true);
+
+                    PrintPlayersPov(table, wid, y, x);
                 }
             }
             else
             {
-                table._dealer._chandful.PrintCards(false);
-                WriteLine($"\nSumm: ??? + {table._dealer.CurrSum(false)}/{table._plank}");
-                WriteLine("\n__________________________________________________________\n");
-                Write($"Plank: {table._plank}\n{table.MrSaw._dealer}\n\t{table.MrSaw._move}\n{table.MrSaw._debtor}");
-                table._tabled_trumps.PrintTrumps();
-                WriteLine("\n__________________________________________________________\n");
-                table._debtor._chandful.PrintCards(true);
-                if (table._debtor.CurrSum(true) <= table._plank)
-                {
-                    WriteLine($"\nSumm: {table._debtor.CurrSum(true)}/{table._plank}");
-                }
-                else
-                {
-                    WriteLine($"\nSumm: {table._debtor.CurrSum(true)}/{table._plank} Someone's got overload! Who might it be..");
-                }
+                DrawWindow(wx, wy, wid, len, $"{table._debtor._nick}'s turn", true);
+
+                PrintPlayersPov(table, wid, y, x);
 
                 table.Turn += table._debtor.TakeTurn;
-                table.TakingTurn();
+                table.TakingTurn(x, len - 2);
 
                 choice = DrawOrStay.Awaitness;
 
                 while (choice == DrawOrStay.Awaitness)
                 {
-                    choice = table.GetPlayerChoice();
+                    choice = table.GetPlayerChoice(x, len-1);
 
                     switch (choice)
                     {
@@ -139,7 +200,11 @@ static void Game()
                             }
                         case DrawOrStay.PrintTrumps:
                             {
-                                table._debtor._thandful.PrintTrumps();
+                                DrawWindow(wx, wy, wid, len, $"{table._debtor._nick}'s turn", true);
+
+                                PrintPlayersPov(table, wid, y, x);
+
+                                PrintTrumpsWindow(x-3, y + len, len, wid, table._debtor);
 
                                 buff_table = new Table(table._dealer.UseTrump(table));
 
@@ -159,8 +224,18 @@ static void Game()
 
                     table.Turn -= table._debtor.TakeTurn;
                     table._whos_turn = false;
+
+                    Clear();
+                    x = wx + 3;
+                    y = wy + 3;
+
+                    DrawWindow(wx, wy, wid, len, $"{table._debtor._nick}'s turn", true);
+
+                    PrintPlayersPov(table, wid, y, x);
                 }
             }
+
+            Clear();
         }
 
         if (table._dealer.CurrSum(true) > table._debtor.CurrSum(true) && table._dealer.CurrSum(true) <= table._plank
@@ -214,10 +289,120 @@ static void Game()
     }
 }
 
+static void DrawWindow(int x, int y, int width, int height, string title, bool clearornot)
+{
+    if (clearornot)
+    {
+        Clear();
+    }
+
+    // Верхняя граница
+    SetCursorPosition(x, y);
+    Write("╔" + new string('═', width - 2) + "╗");
+
+    // Заголовок
+    SetCursorPosition(x + (width - title.Length) / 2, y);
+    Write(title);
+
+    // Боковые границы
+    for (int i = 1; i < height - 1; i++)
+    {
+        SetCursorPosition(x, y + i);
+        Write("║");
+        SetCursorPosition(x + width - 1, y + i);
+        Write("║");
+    }
+
+    // Нижняя граница
+    SetCursorPosition(x, y + height - 1);
+    Write("╚" + new string('═', width - 2) + "╝");
+}
+
+static void PrintPlayersPov(Table table, int wid, int y, int x)
+{
+    if (table._whos_turn == true)
+    {
+        table._dealer._chandful.PrintCards(false, x, y);
+        y += 6;
+        SetCursorPosition(x, y);
+        WriteLine($"Summ: ??? + {table._dealer.CurrSum(false)}/{table._plank}");
+        y += 2;
+        SetCursorPosition(x-2, y);
+        WriteLine(new string('═', wid-2));
+        y+=2;
+        SetCursorPosition(x + 2, y);
+        Write($"{table.MrSaw._dealer}");
+        y += 2;
+        SetCursorPosition(x + 2, y);
+        Write($"Bet: {table.MrSaw._move}");
+        y+=2;
+        SetCursorPosition(x + 2, y);
+        Write($"{table.MrSaw._debtor}");
+        table._tabled_trumps.PrintTrumps(false, x + 9, y - 4);
+        y += 2;
+        SetCursorPosition(x - 2, y);
+        WriteLine(new string('═', wid-2));
+        y++;
+        SetCursorPosition(x, y);
+        if (table._debtor.CurrSum(true) <= table._plank)
+        {
+            WriteLine($"Summ: {table._debtor.CurrSum(true)}/{table._plank}");
+        }
+        else
+        {
+            WriteLine($"Summ: {table._debtor.CurrSum(true)}/{table._plank} Someone's got overload! Who might it be..");
+        }
+        y += 3;
+        table._debtor._chandful.PrintCards(true, x, y);
+    }
+    else
+    {
+        table._debtor._chandful.PrintCards(false, x, y);
+        y += 6;
+        SetCursorPosition(x, y);
+        WriteLine($"Summ: ??? + {table._debtor.CurrSum(false)}/{table._plank}");
+        y += 2;
+        SetCursorPosition(x - 2, y);
+        WriteLine(new string('═', wid - 2));
+        y += 2;
+        SetCursorPosition(x + 2, y);
+        Write($"{table.MrSaw._debtor}");
+        y+=2;
+        SetCursorPosition(x + 2, y);
+        Write($"Bet: {table.MrSaw._move}");
+        y+=2;
+        SetCursorPosition(x + 2, y);
+        Write($"{table.MrSaw._dealer}");
+        table._tabled_trumps.PrintTrumps(false, x + 9, y - 4);
+        y += 2;
+        SetCursorPosition(x - 2, y);
+        WriteLine(new string('═', wid - 2));
+        y++;
+        SetCursorPosition(x, y);
+        if (table._dealer.CurrSum(true) <= table._plank)
+        {
+            WriteLine($"Summ: {table._dealer.CurrSum(true)}/{table._plank}");
+        }
+        else
+        {
+            WriteLine($"Summ: {table._dealer.CurrSum(true)}/{table._plank} Someone's got overload! Who might it be..");
+        }
+        y += 3;
+        table._dealer._chandful.PrintCards(true, x, y);
+    }
+}
+
+static void PrintTrumpsWindow(int x, int y, int len, int wid, Player player)
+{
+    DrawWindow(x, y, wid, len, new string(player._nick + "'s trump cards"), false);
+
+    player._thandful.PrintTrumps(true, x+2, y+3);
+}
+
 public enum TypesOfReturns { PlankChangers = 1, CardGivers, BetChangers, Destroyer, Disservicer, Switcher }
 public enum DrawOrStay { Draw, Stay, PrintTrumps, Awaitness }
 
-public delegate void TakeTurn();
+public delegate void TakeTurn(int x, int y);
 
 public class Table
 {
@@ -232,21 +417,21 @@ public class Table
 
     public List<Trump> _trumps = new List<Trump>()
     {
-        new SvTPlank ( '*', "Plank is gonna be scanged to the 17."),
-        new TwFPlank ( '!', "Plank is gonna be scanged to the 24."),
-        new TwSPlank ( '@', "Plank is gonna be scanged to the 27."),
-        new TwCard ( '2', "Hits you the 2-card if there's no such on the table."),
-        new ThCard ( '3', "Hits you the 3-card if there's no such on the table."),
-        new FrCard ( '4', "Hits you the 4-card if there's no such on the table."),
-        new FvCard ( '5', "Hits you the 5-card if there's no such on the table."),
-        new SxCard ( '6', "Hits you the 6-card if there's no such on the table."),
-        new SvCard ( '7', "Hits you the 7-card if there's no such on the table."),
-        new PrfCard( '+', "Hits you perfect possible card from the deck"),
-        new IncBet ( '>', "Increases bet (Mr. Saw's move) for one."),
-        new DiscBet ( '<', "Discreases bet (Mr. Saw's move) for one."),
-        new Destroy ('$', "Destroys the last trump card opponent placed on the table."),
-        new Disservice ( '-', "Opponent draws one card."),
-        new Switch ('"', "Switches the last drawn by you and your opponent cards.")
+        new SvTPlank ( "17", "Plank is gonna be scanged to the 17."),
+        new TwFPlank ( "24", "Plank is gonna be scanged to the 24."),
+        new TwSPlank ( "27", "Plank is gonna be scanged to the 27."),
+        new TwCard ( "2<", "Hits you the 2-card if there's no such on the table."),
+        new ThCard ( "3<", "Hits you the 3-card if there's no such on the table."),
+        new FrCard ( "4<", "Hits you the 4-card if there's no such on the table."),
+        new FvCard ( "5<", "Hits you the 5-card if there's no such on the table."),
+        new SxCard ( "6<", "Hits you the 6-card if there's no such on the table."),
+        new SvCard ( "7<", "Hits you the 7-card if there's no such on the table."),
+        new PrfCard( "*<", "Hits you perfect possible card from the deck"),
+        new IncBet ( "˄", "Increases bet (Mr. Saw's move) for one."),
+        new DiscBet ( "˅", "Discreases bet (Mr. Saw's move) for one."),
+        new Destroy ( "X", "Destroys the last trump card opponent placed on the table."),
+        new Disservice ( ">?", "Opponent draws one card."),
+        new Switch ( "><", "Switches the last drawn by you and your opponent cards.")
     };
 
     public TrumpHandful _tabled_trumps { get; set; }
@@ -289,19 +474,20 @@ public class Table
         _debtor = new Player(table._debtor);
     }
 
-    public void TakingTurn()
+    public void TakingTurn(int x, int y)
     {
-        WriteLine("\n\nAttention!");
-
-        Turn();
+        Turn(x, y);
     }
 
-    public DrawOrStay GetPlayerChoice()
+    public DrawOrStay GetPlayerChoice(int x, int y)
     {
         while (true)
         {
-            Console.Write("\n(D)raw, (S)tay or (P)rint trumps?");
+            SetCursorPosition(x, y);
 
+            Write("Wanna (D)raw, (S)tay or (P)rint trumps?");
+
+            SetCursorPosition(x, y + 1);
             string input = ReadLine().ToUpper();
 
             switch (input)
@@ -375,48 +561,37 @@ public class Table
         return false;
     }
 
-    public void PrintDeck()
+    public void PrintDeck(int x = 6, int y = 3)
     {
-        foreach (var card in _deck)
-        {
-            Write("   ﹂-----﹁");
-        }
-
-        WriteLine();
 
         foreach (var card in _deck)
         {
-            Write("   |     |");
-        }
+            x += 8;
 
-        WriteLine();
+            SetCursorPosition(x, y);
+            Write("╔═════╗");
 
-        foreach (var card in _deck)
-        {
+            SetCursorPosition(x, y + 1);
+            Write("║     ║");
+
+            SetCursorPosition(x, y + 2);
+
             if ((int)(card._value / 10) < 1)
             {
-                Write($"   |  {card._value}  |");
+                Write($"║  {card._value}  ║");
             }
             else
             {
                 int f = 1, s = card._value - 10;
 
-                Write($"   | {f} {s} |");
+                Write($"║ {f} {s} ║");
             }
-        }
 
-        WriteLine();
+            SetCursorPosition(x, y + 3);
+            Write("║     ║");
 
-        foreach (var card in _deck)
-        {
-            Write("   |     |");
-        }
-
-        WriteLine();
-
-        foreach (var card in _deck)
-        {
-            Write("   ﹂-----﹁");
+            SetCursorPosition(x, y + 4);
+            Write("╚═════╝");
         }
     }
 }
@@ -481,14 +656,15 @@ public class Player
         WriteLine($"{_nick} decided to stay.");
     }
 
-    public void TakeTurn()
+    public void TakeTurn(int x, int y)
     {
-        WriteLine($"{_nick}'s choosing their next move. Better do it carefully.");
+        SetCursorPosition(x, y );
+        WriteLine($"- {_nick}'s choosing their next move. Better do it carefully...");
     }
 
     public Table UseTrump(Table buffT)
     {
-        WriteLine("Put the number of trump card that you want to use (0 in case you don't want to): ");
+        WriteLine("Put the number of trump card that you want to use (0 - exit): ");
 
         int trump = Convert.ToInt32(ReadLine());
 
@@ -534,7 +710,14 @@ public class Player
             {
                 buffT._plank = ret._plank;
 
-                buffT._tabled_trumps._trumps.Add(_thandful._trumps[trump]);
+                if (buffT._whos_turn == false)
+                {
+                    buffT._tabled_trumps._trumps.Add(buffT._dealer._thandful._trumps[trump]);
+                }
+                else
+                {
+                    buffT._tabled_trumps._trumps.Add(buffT._debtor._thandful._trumps[trump]);
+                }
             }
             else if(ret._type == TypesOfReturns.CardGivers)
             {
@@ -553,7 +736,14 @@ public class Player
             {
                 buffT.MrSaw._move += ret._bet;
 
-                buffT._tabled_trumps._trumps.Add(_thandful._trumps[trump]);
+                if (buffT._whos_turn == false)
+                {
+                    buffT._tabled_trumps._trumps.Add(buffT._dealer._thandful._trumps[trump]);
+                }
+                else
+                {
+                    buffT._tabled_trumps._trumps.Add(buffT._debtor._thandful._trumps[trump]);
+                }
             }
             else if(ret._type == TypesOfReturns.Destroyer)
             {
@@ -631,76 +821,70 @@ public class CardHandful
         _unknown_card = cards._unknown_card;
     }
 
-    public void PrintCards(bool ifwriteunk)
+    public void PrintCards(bool ifwriteunk, int x = 6, int y = 3)
     {
-        WriteLine();
+        SetCursorPosition(x, y);
+        Write("╔═════╗");
 
-        Write("   ﹂-----﹁");
+        SetCursorPosition(x, y + 1);
+        Write("║     ║");
 
-        foreach (var card in _cards)
-        {
-            Write("   ﹂-----﹁");
-        }
+        SetCursorPosition(x, y + 2);
 
-        WriteLine();
-
-        Write("   |     |");
-
-        foreach (var card in _cards)
-        {
-            Write("   |     |");
-        }
-
-        WriteLine();
-
-        if (ifwriteunk == true)
+        if (ifwriteunk)
         {
             if ((int)(_unknown_card._value / 10) < 1)
             {
-                Write($"   |  {_unknown_card._value}  |");
+                Write($"║  {_unknown_card._value}  ║");
             }
             else
             {
                 int f = 1, s = _unknown_card._value - 10;
 
-                Write($"   | {f} {s} |");
+                Write($"║ {f} {s} ║");
             }
         }
         else
         {
-            Write("   | ??? |");
+            Write($"║ ??? ║");
         }
+
+            SetCursorPosition(x, y + 3);
+        Write("║     ║");
+
+        SetCursorPosition(x, y + 4);
+        Write("╚═════╝");
+
+        x += 8;
 
         foreach (var card in _cards)
         {
+            SetCursorPosition(x, y);
+            Write("╔═════╗");
+
+            SetCursorPosition(x, y + 1);
+            Write("║     ║");
+
+            SetCursorPosition(x, y + 2);
+
             if ((int)(card._value / 10) < 1)
             {
-                Write($"   |  {card._value}  |");
+                Write($"║  {card._value}  ║");
             }
             else
             {
                 int f = 1, s = card._value - 10;
 
-                Write($"   | {f} {s} |");
+                Write($"║ {f} {s} ║");
             }
-        }
 
-        WriteLine();
+            SetCursorPosition(x, y + 3);
+            Write("║     ║");
 
-        Write("   |     |");
+            SetCursorPosition(x, y + 4);
+            Write("╚═════╝");
 
-        foreach (var card in _cards)
-        {
-            Write("   |     |");
-        }
-
-        WriteLine();
-
-        Write("   ﹂-----﹁");
-
-        foreach (var card in _cards)
-        {
-            Write("   ﹂-----﹁");
+            x += 8;
         }
     }
 }
@@ -734,50 +918,57 @@ public class TrumpHandful
         }
     }
 
-    public void PrintTrumps()
+    public int PrintTrumps(bool need_desc, int x = 6, int y = 3)
     {
-        WriteLine();
+        int buffx = x;
 
         foreach (var card in _trumps)
         {
-            Write("   ﹂-----﹁");
+            SetCursorPosition(x, y);
+            Write("╔═════╗");
+
+            SetCursorPosition(x, y + 1);
+            Write("║     ║");
+
+            SetCursorPosition(x, y + 2);
+
+            if ((int)(card._sign.Length) < 2)
+            {
+                Write($"║  {card._sign}  ║");
+            }
+            else
+            {
+                char f = card._sign[0], s = card._sign[1];
+
+                Write($"║ {f} {s} ║");
+            }
+
+            SetCursorPosition(x, y + 3);
+            Write("║     ║");
+
+            SetCursorPosition(x, y + 4);
+            Write("╚═════╝");
+
+            x += 8;
         }
 
-        WriteLine();
-
-        foreach (var card in _trumps)
+        if (need_desc)
         {
-            Write("   |     |");
+            int count = 1;
+            y += 6;
+            x = buffx;
+
+            SetCursorPosition(x, y);
+
+            foreach (var card in _trumps)
+            {
+                y += count;
+                WriteLine($"{count++}. - {card._desc}");
+                SetCursorPosition(x, y);
+            }
         }
 
-        WriteLine();
-
-        foreach (var card in _trumps)
-        {
-            Write($"   |  {card._sign}  |");
-        }
-
-        WriteLine();
-
-        foreach (var card in _trumps)
-        {
-            Write("   |     |");
-        }
-
-        WriteLine();
-
-        foreach (var card in _trumps)
-        {
-            Write("   ﹂-----﹁");
-        }
-
-        WriteLine("\n\n");
-        int counter = 1;
-
-        foreach (var trump in _trumps)
-        {
-            WriteLine($"{counter++}. - {trump._desc}.");
-        }
+        return y;
     }
 }
 
@@ -794,25 +985,11 @@ public class Card
     {
         _value = card._value;
     }
-
-    public override string ToString()
-    {
-        if ((int)(_value / 10) < 1)
-        {
-            return $"  ﹂-----﹁\n  |     |\n  |  {_value}  |\n  |     |\n  ﹂-----﹁";
-        }
-        else
-        {
-            int f = 1, s = _value - 10;
-
-            return $"  ﹂-----﹁\n  |     |\n  | {f} {s} |\n  |     |\n  ﹂-----﹁";
-        }
-    }
 }
 
 public abstract class Trump
 {
-    public char _sign { get; set; }
+    public string _sign { get; set; }
 
     public string _desc { get; set; }
 
@@ -831,15 +1008,10 @@ public abstract class Trump
 
     public abstract ReturningTrump UseTrump(Table buffT);
 
-    public Trump(char sign, string desc)
+    public Trump(string sign, string desc)
     {
         _sign = sign;
         _desc = desc;
-    }
-
-    public override string ToString()
-    {
-        return $"  ﹂-----﹁\n  |     |\n  |  {_sign}  |\n  |     |\n  ﹂-----﹁";
     }
 }
 
@@ -849,13 +1021,6 @@ public class Saw
     public int _debtor { get; set; }
     public int _move { get; set; }
 
-    public string SawItself =
-        "|   *****\n" +
-        "|   |    \n" +
-        "*********\n" +
-        "    |   |\n" +
-        "*****   |";
-
     public Saw() { }
     public Saw(Saw saw)
     {
@@ -864,24 +1029,6 @@ public class Saw
         _move = saw._move;
     }
 
-    public override string ToString()
-    {
-        string ret_val = " ";
-
-        for (int i = 0; i< _dealer; i++)
-        {
-            ret_val += (string)"         ";
-        }
-
-        ret_val += SawItself + '\n';
-
-        for (int i = 0; i < _debtor; i++)
-        {
-            ret_val += (string)"         ";
-        }
-
-        return ret_val;
-    }
 }
 
 public class ReturningTrump
@@ -902,7 +1049,7 @@ public class ReturningTrump
 
 public class SvTPlank : Trump
 {
-    public SvTPlank(char sign, string desc) : base(sign, desc) { }
+    public SvTPlank(string sign, string desc) : base(sign, desc) { }
     public TypesOfReturns _tabled_type = TypesOfReturns.PlankChangers;
 
     public override ReturningTrump UseTrump(Table buffT)
@@ -913,7 +1060,7 @@ public class SvTPlank : Trump
 
 public class TwFPlank : Trump
 {
-    public TwFPlank(char sign, string desc) : base(sign, desc) { }
+    public TwFPlank(string sign, string desc) : base(sign, desc) { }
     public TypesOfReturns _tabled_type = TypesOfReturns.PlankChangers;
 
     public override ReturningTrump UseTrump(Table buffT)
@@ -924,7 +1071,7 @@ public class TwFPlank : Trump
 
 public class TwSPlank : Trump
 {
-    public TwSPlank(char sign, string desc) : base(sign, desc) { }
+    public TwSPlank(string sign, string desc) : base(sign, desc) { }
     public TypesOfReturns _tabled_type = TypesOfReturns.PlankChangers;
 
     public override ReturningTrump UseTrump(Table buffT)
@@ -936,7 +1083,7 @@ public class TwSPlank : Trump
 
 public class SvCard : Trump
 {
-    public SvCard(char sign, string desc) : base(sign, desc) { }
+    public SvCard(string sign, string desc) : base(sign, desc) { }
 
     public override ReturningTrump UseTrump(Table buffT)
     {
@@ -950,7 +1097,7 @@ public class SvCard : Trump
 
 public class SxCard : Trump
 {
-    public SxCard(char sign, string desc) : base(sign, desc) { }
+    public SxCard(string sign, string desc) : base(sign, desc) { }
 
     public override ReturningTrump UseTrump(Table buffT)
     {
@@ -964,7 +1111,7 @@ public class SxCard : Trump
 
 public class FvCard : Trump
 {
-    public FvCard(char sign, string desc) : base(sign, desc) { }
+    public FvCard(string sign, string desc) : base(sign, desc) { }
 
     public override ReturningTrump UseTrump(Table buffT)
     {
@@ -978,7 +1125,7 @@ public class FvCard : Trump
 
 public class FrCard : Trump
 {
-    public FrCard(char sign, string desc) : base(sign, desc) { }
+    public FrCard(string sign, string desc) : base(sign, desc) { }
 
     public override ReturningTrump UseTrump(Table buffT)
     {
@@ -992,7 +1139,7 @@ public class FrCard : Trump
 
 public class ThCard : Trump
 {
-    public ThCard(char sign, string desc) : base(sign, desc) { }
+    public ThCard(string sign, string desc) : base(sign, desc) { }
 
     public override ReturningTrump UseTrump(Table buffT)
     {
@@ -1006,7 +1153,7 @@ public class ThCard : Trump
 
 public class TwCard : Trump
 {
-    public TwCard(char sign, string desc) : base(sign, desc) { }
+    public TwCard(string sign, string desc) : base(sign, desc) { }
 
     public override ReturningTrump UseTrump(Table buffT)
     {
@@ -1020,7 +1167,7 @@ public class TwCard : Trump
 
 public class PrfCard : Trump
 {
-    public PrfCard(char sign, string desc) : base(sign, desc) { }
+    public PrfCard(string sign, string desc) : base(sign, desc) { }
 
     public override ReturningTrump UseTrump(Table buffT)
     {
@@ -1057,7 +1204,7 @@ public class PrfCard : Trump
 
 public class IncBet : Trump
 {
-    public IncBet(char sign, string desc) : base(sign, desc) { }
+    public IncBet(string sign, string desc) : base(sign, desc) { }
     public TypesOfReturns _tabled_type = TypesOfReturns.BetChangers;
     public char _inc_or_dis = '+';
 
@@ -1073,7 +1220,7 @@ public class IncBet : Trump
 
 public class DiscBet : Trump
 {
-    public DiscBet(char sign, string desc) : base(sign, desc) { }
+    public DiscBet(string sign, string desc) : base(sign, desc) { }
     public TypesOfReturns _tabled_type = TypesOfReturns.BetChangers;
     public char _inc_or_dis = '-';
 
@@ -1089,7 +1236,7 @@ public class DiscBet : Trump
 
 public class Destroy : Trump
 {
-    public Destroy(char sign, string desc) : base(sign, desc) { }
+    public Destroy(string sign, string desc) : base(sign, desc) { }
 
     public override ReturningTrump UseTrump(Table buffT)
     {
@@ -1103,7 +1250,7 @@ public class Destroy : Trump
 
 public class Disservice : Trump
 {
-    public Disservice(char sign, string desc) : base(sign, desc) { }
+    public Disservice(string sign, string desc) : base(sign, desc) { }
 
     public override ReturningTrump UseTrump(Table buffT)
     {
@@ -1117,7 +1264,7 @@ public class Disservice : Trump
 
 public class Switch : Trump
 {
-    public Switch(char sign, string desc) : base(sign, desc) { }
+    public Switch(string sign, string desc) : base(sign, desc) { }
 
     public override ReturningTrump UseTrump(Table buffT)
     {
