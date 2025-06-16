@@ -13,6 +13,9 @@ static void Menu()
     bool showmenu = true;
     while (showmenu)
     {
+        BackgroundColor = ConsoleColor.Black;
+        ForegroundColor = ConsoleColor.DarkRed;
+
         DrawWindow(8, 2, 40, 13, "Меню", true);
         SetCursorPosition(12, 5);
         WriteLine("1. Новая игра.");
