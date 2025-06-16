@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel.Design;
 using System.Security.Cryptography;
+using System.Text.Json;
 using static System.Console;
 
 //Game();
@@ -70,7 +71,7 @@ static void Menu()
                 }
             case 3:
                 {
-
+                    DownloadResults();
 
                     break;
                 }
@@ -89,7 +90,7 @@ static void Game(string dealer_name, string debtor_name)
     Table table = new Table(dealer_name, debtor_name);
     Table buff_table = new Table("buff", "buff");
     table._whos_turn = true;
-    int rounds = 1;
+    int rounds = 0;
     Random rand = new Random();
     string fin = "buff";
 
@@ -103,6 +104,8 @@ static void Game(string dealer_name, string debtor_name)
 
     while (table.MrSaw._dealer > 0 && table.MrSaw._debtor > 0)
     {
+        rounds++;
+
         x = wx + 3;
         y = wy + 3;
 
@@ -304,16 +307,18 @@ static void Game(string dealer_name, string debtor_name)
         }
     }
 
-    if(table.MrSaw._dealer <= 0)
+    if(table.MrSaw._debtor <= 0)
     {
+        UploadResults(rounds, table._dealer._nick);
         DrawWindow(wx, wy, 40, 8, $"{table._dealer._nick} победил!", true);
         SetCursorPosition(wx + 3, wy + 3);
         Write("Нажмите Enter для завершения игры.");
         SetCursorPosition(wx + 19, wy + 5);
         ReadLine();
     }
-    else if(table.MrSaw._debtor <= 0)
+    else if(table.MrSaw._dealer <= 0)
     {
+        UploadResults(rounds, table._debtor._nick);
         DrawWindow(wx, wy, 40, 8, $"{table._debtor._nick} победил!", true);
         SetCursorPosition(wx + 3, wy + 3);
         Write("Нажмите Enter для завершения игры.");
@@ -322,6 +327,38 @@ static void Game(string dealer_name, string debtor_name)
     }
 
     SetCursorPosition(wx + 20, wy + 10);
+}
+
+static void UploadResults(int rounds, string winner)
+{
+    string json_rounds = JsonSerializer.Serialize(rounds);
+    File.WriteAllText("rounds.json", json_rounds);
+
+    string json_winner = JsonSerializer.Serialize(winner);
+    File.WriteAllText("winner.json", json_winner);
+}
+
+static void DownloadResults()
+{
+    int wx = 8, wy = 3;
+    int x = wx + 3, y = wy + 3;
+    int wid = 44, len = 12;
+
+    string json_rounds = File.ReadAllText("rounds.json");
+    int load_rounds = JsonSerializer.Deserialize<int>(json_rounds);
+
+    string json_winner = File.ReadAllText("winner.json");
+    string load_winner = JsonSerializer.Deserialize<string>(json_winner);
+
+    DrawWindow(wx, wy, wid, len, $"Последние результаты", true);
+    SetCursorPosition(wx + 2, wy + 2);
+    Write($"- Последним победителем был игрок {load_winner}.");
+    SetCursorPosition(wx + 2, wy + 4);
+    Write($"- Последняя игра длилась {load_rounds} раунда(ов).");
+    SetCursorPosition(wx + 4, wy + 7);
+    Write("Нажмите Enter для возвращения в меню.");
+    SetCursorPosition(wx + 20, wy + 9);
+    ReadLine();
 }
 
 static void ShowRules()
