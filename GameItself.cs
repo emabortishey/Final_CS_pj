@@ -19,38 +19,42 @@ static void Menu()
         BackgroundColor = ConsoleColor.Black;
         ForegroundColor = ConsoleColor.DarkRed;
 
-        try
+        while (chared_choice != '1' && chared_choice != '2' && chared_choice != '3' && chared_choice != '4' || choice.Length >1)
         {
-            DrawWindow(8, 2, 40, 13, "Меню", true);
-            SetCursorPosition(12, 5);
-            WriteLine("1. Новая игра.");
-            SetCursorPosition(12, 6);
-            WriteLine("2. Правила.");
-            SetCursorPosition(12, 7);
-            WriteLine("3. Результаты.");
-            SetCursorPosition(12, 8);
-            WriteLine("4. Выход");
-
-            // Обработка выбора
-            SetCursorPosition(12, 11);
-            Write("Введите свой выбор: ");
-            SetCursorPosition(31, 12);
-            WriteLine("════════");
-            SetCursorPosition(32, 11);
-            choice = ReadLine();
-
-            chared_choice = choice[0];
-
-            if (choice.Length > 1 || !char.IsDigit(chared_choice) || chared_choice != '1' && chared_choice != '2' && chared_choice != '3' && chared_choice != '4')
+            try
             {
-                throw new ReadLineExc("Недопустимое значение при вводе в главном меню.");
+                DrawWindow(8, 2, 40, 13, "Меню", true);
+                SetCursorPosition(12, 5);
+                WriteLine("1. Новая игра.");
+                SetCursorPosition(12, 6);
+                WriteLine("2. Правила.");
+                SetCursorPosition(12, 7);
+                WriteLine("3. Результаты.");
+                SetCursorPosition(12, 8);
+                WriteLine("4. Выход");
+
+                // Обработка выбора
+                SetCursorPosition(12, 11);
+                Write("Введите свой выбор: ");
+                SetCursorPosition(31, 12);
+                WriteLine("════════");
+                SetCursorPosition(32, 11);
+                choice = ReadLine();
+
+                chared_choice = choice[0];
+
+                if (choice.Length > 1 || !char.IsDigit(chared_choice) || chared_choice != '1' && chared_choice != '2' && chared_choice != '3' && chared_choice != '4')
+                {
+                    throw new ReadLineExc("Недопустимое значение при вводе в главном меню.");
+                }
             }
-        }
-        catch (ReadLineExc ex)
-        {
-            WriteLine("\n\n\n");
-            WriteLine(ex.ToString());
-            ReadLine();
+            catch (ReadLineExc ex)
+            {
+                WriteLine("\n\n\n");
+                WriteLine(ex.ToString());
+                ReadLine();
+
+            }
         }
 
         switch (chared_choice)
