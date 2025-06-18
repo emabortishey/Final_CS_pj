@@ -851,10 +851,9 @@ public class Player
     {
         Write("Введите номер козыря который желаете использовать (0 - выход): ");
         string trump;
-        int inted_trump = 0;
+        int inted_trump = -1;
 
-
-        while (inted_trump < 1 || inted_trump > _thandful._trumps.Count)
+        while (inted_trump < 0 || inted_trump > _thandful._trumps.Count)
         {
             trump = ReadLine();
 
