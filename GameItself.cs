@@ -92,12 +92,14 @@ static void Menu()
             case '2':
                 {
                     ShowRules();
+                    chared_choice = ' ';
 
                     break;
                 }
             case '3':
                 {
                     DownloadResults();
+                    chared_choice = ' ';
 
                     break;
                 }
